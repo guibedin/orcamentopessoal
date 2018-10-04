@@ -1,34 +1,47 @@
 package br.com.guibedin.orcamentopessoal.resources;
 
-import java.sql.Date;
+import java.time.LocalDate;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
-import org.springframework.data.annotation.PersistenceConstructor;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Entity
 public class Conta {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
-	private Integer id;
-	private String descricao;
-	private Double valor;
-	private Date data;
-	private int tipo;
+	protected Integer id;
+	
+	@ManyToOne
+	protected Usuario usuario;
+	
+	protected String descricao;
+	protected Double valor;
+	protected LocalDate dataInicial;
+	protected LocalDate dataFinal;
+	protected Integer duracao;
+	protected Boolean isEntrada; // Entrada ou Saida
+	protected Boolean isFixa; // Fixa ou variavel
 	
 	public Conta() {}
 	
-	public Conta(Integer id, String descricao, Double valor, Date data, int tipo) {
+	public Conta(Integer id, String descricao, Double valor, String dataString, Integer duracao, Boolean isEntrada, Boolean isFixa) {
 		
 		this.id = id;
 		this.descricao = descricao;
 		this.valor = valor;
-		this.data = data;
-		this.tipo = tipo;		
+		this.dataInicial = LocalDate.parse(dataString);	
+		this.duracao = duracao;
+		this.isEntrada = isEntrada;
+		this.isFixa = isFixa;
+		this.usuario = new Usuario("guibedin", "guibedin");
+		
+		calculaDataFinal();
 	}
 	
 	public Conta(NovaConta nova_conta) { 
@@ -36,8 +49,13 @@ public class Conta {
 		this.id = 0;
 		this.descricao = nova_conta.getDescricao();
 		this.valor = nova_conta.getValor();
-		this.data = nova_conta.getData();
-		this.tipo = nova_conta.getTipo();
+		this.dataInicial = nova_conta.getDataInicial();		
+		this.duracao = nova_conta.getDuracao();
+		this.isFixa = nova_conta.getIsFixa();
+		this.isEntrada = nova_conta.getIsEntrada();		
+		this.usuario = new Usuario("guibedin", "guibedin");
+		
+		calculaDataFinal();
 	}
 
 	public long getId() {
@@ -52,13 +70,42 @@ public class Conta {
 		return valor;
 	}
 
-	public Date getData() {
-		return data;
-	}
-
-	public int getTipo() {
-		return tipo;
+	public LocalDate getDataInicial() {
+		return dataInicial;
 	}
 	
+	public LocalDate getDataFinal() {
+		return dataFinal;
+	}
 	
+	public Integer getDuracao() {
+		return duracao;
+	}
+	
+	public Boolean getIsEntrada() {
+		return isEntrada;
+	}
+	
+	public Boolean getIsFixa() {
+		return isFixa;
+	}
+	
+	public void calculaDataFinal() {
+		if(!this.isFixa) {
+			this.dataFinal = this.dataInicial;
+		} else {
+			this.dataFinal = this.dataInicial.plusMonths(this.duracao - 1);	
+		}		
+	}
+	
+	@Override
+	public String toString() {
+		try {
+			return new ObjectMapper().writeValueAsString(this);
+		} catch(Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+	}
 }
