@@ -39,7 +39,7 @@ public class Conta {
 		this.duracao = duracao;
 		this.isEntrada = isEntrada;
 		this.isFixa = isFixa;
-		this.usuario = new Usuario("guibedin", "guibedin");
+		this.usuario = new Usuario("guibedin", "guibedin", "guibedin@gmail.com");
 		
 		calculaDataFinal();
 	}
@@ -53,7 +53,7 @@ public class Conta {
 		this.duracao = nova_conta.getDuracao();
 		this.isFixa = nova_conta.getIsFixa();
 		this.isEntrada = nova_conta.getIsEntrada();		
-		this.usuario = new Usuario("guibedin", "guibedin");
+		this.usuario = new Usuario("guibedin", "guibedin", "guibedin@gmail.com");
 		
 		calculaDataFinal();
 	}

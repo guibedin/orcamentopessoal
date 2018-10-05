@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,6 +20,24 @@ public class UsuarioController {
 
 	@Autowired
 	private UsuarioRepository usuarioRepository;
+	
+	// Cadastra um novo usuario
+	@PostMapping("/usuario/cadastrar/")
+	public ResponseEntity<UsuarioDTO> cadastrarUsuario(@RequestBody Usuario usuarioNovo) {
+	
+		Usuario usuario = new Usuario(usuarioNovo);
+		Usuario buscaNome = usuarioRepository.findByNome(usuario.getNome());
+		Usuario buscaEmail = usuarioRepository.findByEmail(usuario.getEmail());
+		
+		if( buscaNome == null && buscaEmail == null) {
+			usuarioRepository.save(usuario);
+			System.out.println("Usuario cadastrado: " + usuario.getNome() + " " + usuario.getEmail());
+			
+			return ResponseEntity.status(HttpStatus.OK).body(null);
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+		}
+	}
 	
 	// Retorna um usuarioDTO, que é basicamente um usuario sem a senha
 	@GetMapping("/usuario/")

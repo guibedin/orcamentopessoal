@@ -56,7 +56,7 @@ public class ContaController {
 		}	
 	}
 	
-	@CrossOrigin(origins = "http://localhost:3000/", allowCredentials = "false")
+	//@CrossOrigin(origins = "http://localhost:3000/", allowCredentials = "false")
 	@RequestMapping(path = "/contas/remove/{id}", method = RequestMethod.OPTIONS)
 	public void options() {
 		System.out.println("Contas Remove OPTIONS");
