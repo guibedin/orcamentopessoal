@@ -3,6 +3,7 @@ package br.com.guibedin.orcamentopessoal.resources;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -10,12 +11,15 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 @Entity
-public class Usuario {
+public class Usuario implements UserDetails { 
 
 	@Id
-	private String nome;
-	private String senha;
+	private String username;
+	private String password;
 	private String email;	
 	@OneToMany(mappedBy="usuario")
 	private List<Conta> contas = new ArrayList<Conta>();
@@ -40,19 +44,20 @@ public class Usuario {
 	private LocalDate ldPeriodoInicio;
 	public Usuario() {}
 	
-	public Usuario(String nome, String senha, String email) {
+	public Usuario(String username, String password, String email) {
 		
-		this.nome = nome;
-		this.senha = senha;
+		this.username = username;
+		this.password = password;
 		this.email = email;
 	}
 	
 	public Usuario(Usuario u) {
 		
-		this.nome = u.nome;
-		this.senha = u.senha;
+		this.username = u.username;
+		this.password = u.password;
 		this.email = u.email;
 	}
+	
 	
 	// Calcula totais e saldo de todos os tempos - retorna todas as contas
 	public void calculaTotaisESaldoTotal() {
@@ -125,7 +130,7 @@ public class Usuario {
 		ldPeriodoInicio = periodoInicio.atEndOfMonth();
 		LocalDate ldPeriodoFim = periodoFim.atEndOfMonth();
 		
-		ArrayList<Conta> contasRemovidas = new ArrayList<Conta>();
+		//ArrayList<Conta> contasRemovidas = new ArrayList<Conta>();
 		ArrayList<Conta> contasRetornadas = new ArrayList<Conta>();
 		
 		
@@ -216,6 +221,15 @@ public class Usuario {
 		return false;		
 	}
 	
+	public boolean autentica(String password) {
+		
+		if(password.equals(this.password)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	public void adicionaConta(Conta conta) {		
 		contas.add(conta);
 	}
@@ -224,20 +238,12 @@ public class Usuario {
 		contas.remove(conta);
 	}
 	
-	public String getNome() {
-		return nome;
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
-	public void setNome(String nome) {
-		this.nome = nome;
-	}
-
-	public String getSenha() {
-		return senha;
-	}
-
-	public void setSenha(String senha) {
-		this.senha = senha;
+	public void setPassword(String password) {
+		this.password = password;
 	}
 	
 	public String getEmail() {
@@ -310,5 +316,40 @@ public class Usuario {
 
 	public void setTotalSaidaGeral(Double totalSaidaGeral) {
 		this.totalSaidaGeral = totalSaidaGeral;
-	}	
+	}
+
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return new ArrayList<>();
+	}
+
+	@Override
+	public String getPassword() {
+		return this.password;
+	}
+
+	@Override
+	public String getUsername() {
+		return this.username;
+	}
+
+	@Override
+	public boolean isAccountNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isAccountNonLocked() {
+		return true;
+	}
+
+	@Override
+	public boolean isCredentialsNonExpired() {
+		return true;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return true;
+	}
 }

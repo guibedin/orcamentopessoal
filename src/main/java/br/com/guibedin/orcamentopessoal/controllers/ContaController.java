@@ -56,6 +56,7 @@ public class ContaController {
 		}	
 	}
 	
+	/*
 	//@CrossOrigin(origins = "http://localhost:3000/", allowCredentials = "false")
 	@RequestMapping(path = "/contas/remove/{id}", method = RequestMethod.OPTIONS)
 	public void options() {
@@ -64,6 +65,6 @@ public class ContaController {
 	
 	public boolean validaNovaConta(NovaConta nc) {
 		return true;
-	}
+	}*/
 
 }	

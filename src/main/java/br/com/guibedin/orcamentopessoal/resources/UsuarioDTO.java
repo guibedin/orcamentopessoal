@@ -34,7 +34,7 @@ public class UsuarioDTO {
 	
 	public UsuarioDTO(Usuario u) {
 		
-		this.nome = u.getNome();
+		this.nome = u.getUsername();
 		this.saldo = u.getSaldo();
 		this.contas = u.getContas();
 		this.totalEntradaFixa = u.getTotalEntradaFixa();
