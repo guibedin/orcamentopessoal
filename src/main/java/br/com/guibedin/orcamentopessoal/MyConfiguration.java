@@ -48,8 +48,8 @@ public class MyConfiguration extends WebSecurityConfigurerAdapter {
 		http
 			.exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint).and()
 	        .authorizeRequests()
-	        //.antMatchers("/usuario/login/").permitAll()
-	        //.antMatchers("/usuario/cadastrar/").permitAll()
+	        .antMatchers("/usuario/login/").permitAll()
+	        .antMatchers("/usuario/cadastrar/").permitAll()
 			.antMatchers(HttpMethod.POST, "/contas/**").authenticated()
 			.antMatchers(HttpMethod.GET, "/usuario/**").authenticated()
 	        .and()

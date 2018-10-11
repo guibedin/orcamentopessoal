@@ -7,6 +7,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.Transient;
+
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -28,9 +31,13 @@ public class Conta {
 	protected Boolean isEntrada; // Entrada ou Saida
 	protected Boolean isFixa; // Fixa ou variavel
 	
+	@Transient
+	@Autowired
+	private UsuarioRepository usuarioRepository;
+	
 	public Conta() {}
 	
-	public Conta(Integer id, String descricao, Double valor, String dataString, Integer duracao, Boolean isEntrada, Boolean isFixa) {
+	public Conta(Integer id, String descricao, Double valor, String dataString, Integer duracao, Boolean isEntrada, Boolean isFixa, Usuario usuario) {
 		
 		this.id = id;
 		this.descricao = descricao;
@@ -39,12 +46,12 @@ public class Conta {
 		this.duracao = duracao;
 		this.isEntrada = isEntrada;
 		this.isFixa = isFixa;
-		this.usuario = new Usuario("guibedin", "guibedin", "guibedin@gmail.com");
+		this.usuario = usuario;
 		
 		calculaDataFinal();
 	}
 	
-	public Conta(NovaConta nova_conta) { 
+	public Conta(NovaConta nova_conta, Usuario usuario) { 
 		
 		this.id = 0;
 		this.descricao = nova_conta.getDescricao();
@@ -53,7 +60,7 @@ public class Conta {
 		this.duracao = nova_conta.getDuracao();
 		this.isFixa = nova_conta.getIsFixa();
 		this.isEntrada = nova_conta.getIsEntrada();		
-		this.usuario = new Usuario("guibedin", "guibedin", "guibedin@gmail.com");
+		this.usuario = usuario;
 		
 		calculaDataFinal();
 	}

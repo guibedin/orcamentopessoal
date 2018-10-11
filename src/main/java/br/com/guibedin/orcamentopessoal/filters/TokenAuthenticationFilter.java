@@ -1,18 +1,15 @@
 package br.com.guibedin.orcamentopessoal.filters;
 
 import java.io.IOException;
-import java.util.Enumeration;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import br.com.guibedin.orcamentopessoal.helpers.AnonAuthentication;
 import br.com.guibedin.orcamentopessoal.helpers.TokenBasedAuthentication;
 import br.com.guibedin.orcamentopessoal.helpers.TokenHelper;
 import br.com.guibedin.orcamentopessoal.resources.Usuario;
@@ -76,8 +73,6 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter  {
 		            authentication.setToken(authToken);
 		            SecurityContextHolder.getContext().setAuthentication(authentication);
 	            }
-	            
-	            
 	        } else {
 	            error = "Usuario nao encontrado no banco de dados";
 	        }

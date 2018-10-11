@@ -42,8 +42,23 @@ public class TokenHelper {
         return claims;
     }
 	
-	/*public Claims getClaimsFromToken(String token) {
+	public String getTokenFromHeader(String header) {
 		
-		return null;
-	}*/
+		String authToken = "";
+		
+		if(header.startsWith("Bearer ")) {
+			authToken = header.split(" ")[1];
+		}
+		return authToken;
+	}
+	
+	public String getUsernameFromHeader(String header) {
+		
+		// Pega o token a partir do header
+		String authToken = getTokenFromHeader(header);
+		// Pega o usuario a partir do token
+		String username = getUsernameFromToken(authToken);
+		
+		return username;
+	}
 }

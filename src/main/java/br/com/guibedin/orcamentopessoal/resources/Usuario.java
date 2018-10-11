@@ -20,7 +20,8 @@ public class Usuario implements UserDetails {
 	@Id
 	private String username;
 	private String password;
-	private String email;	
+	private String email;
+	//private Double saldo;
 	@OneToMany(mappedBy="usuario")
 	private List<Conta> contas = new ArrayList<Conta>();
 	
@@ -44,11 +45,12 @@ public class Usuario implements UserDetails {
 	private LocalDate ldPeriodoInicio;
 	public Usuario() {}
 	
-	public Usuario(String username, String password, String email) {
+	public Usuario(String username, String password, String email) {//, Double saldo) {
 		
 		this.username = username;
 		this.password = password;
 		this.email = email;
+		//this.saldo = saldo;
 	}
 	
 	public Usuario(Usuario u) {
@@ -56,11 +58,15 @@ public class Usuario implements UserDetails {
 		this.username = u.username;
 		this.password = u.password;
 		this.email = u.email;
+		//this.saldo = u.saldo;
 	}
 	
+	public Usuario(String username) {
+		
+	}
 	
 	// Calcula totais e saldo de todos os tempos - retorna todas as contas
-	public void calculaTotaisESaldoTotal() {
+	public void calculaTotais() {
 	
 		contas.forEach(conta -> {
 			if(conta.getIsFixa()) {								
@@ -81,8 +87,7 @@ public class Usuario implements UserDetails {
 				}
 			}			
 		});
-		
-		saldo = totalEntradaGeral - totalSaidaGeral;
+		this.saldo = totalEntradaGeral - totalSaidaGeral;
 	}
 	
 	// Calcula totais e saldo de um mes e ano especificos - retorna só contas do mes e ano especificos
