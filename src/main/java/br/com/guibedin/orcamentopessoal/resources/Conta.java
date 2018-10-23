@@ -25,12 +25,15 @@ public class Conta {
 	
 	protected String descricao;
 	protected Double valor;
-	protected LocalDate dataInicial;
+	protected LocalDate data;
 	protected LocalDate dataFinal;
-	protected Integer duracao;
+	
 	protected Boolean isEntrada; // Entrada ou Saida
 	protected Boolean isFixa; // Fixa ou variavel
+	protected Boolean isHelper; // Conta Helper = conta fixa que nao precisa ser retornada para o front end, pois eh utilizada para facilitar calculos
 	
+	@Transient
+	protected Integer duracao;
 	@Transient
 	@Autowired
 	private UsuarioRepository usuarioRepository;
@@ -42,7 +45,7 @@ public class Conta {
 		this.id = id;
 		this.descricao = descricao;
 		this.valor = valor;
-		this.dataInicial = LocalDate.parse(dataString);	
+		this.data = LocalDate.parse(dataString);	
 		this.duracao = duracao;
 		this.isEntrada = isEntrada;
 		this.isFixa = isFixa;
@@ -51,18 +54,22 @@ public class Conta {
 		calculaDataFinal();
 	}
 	
-	public Conta(NovaConta nova_conta, Usuario usuario) { 
+	public Conta(NovaConta novaConta, Usuario usuario) { 
 		
 		this.id = 0;
-		this.descricao = nova_conta.getDescricao();
-		this.valor = nova_conta.getValor();
-		this.dataInicial = nova_conta.getDataInicial();		
-		this.duracao = nova_conta.getDuracao();
-		this.isFixa = nova_conta.getIsFixa();
-		this.isEntrada = nova_conta.getIsEntrada();		
+		this.descricao = novaConta.getDescricao();
+		this.valor = novaConta.getValor();
+		this.data = novaConta.getData();
+		this.dataFinal = novaConta.getDataFinal();
+		this.duracao = novaConta.getDuracao();
+		this.isFixa = novaConta.getIsFixa();
+		this.isEntrada = novaConta.getIsEntrada();		
+		this.isHelper = novaConta.getIsHelper();
 		this.usuario = usuario;
-		
-		calculaDataFinal();
+		//System.out.println("CONTA IS HELPER: " + this.isHelper);				
+		/*if(!this.isHelper) {
+			calculaDataFinal();
+		}*/
 	}
 
 	public long getId() {
@@ -77,8 +84,8 @@ public class Conta {
 		return valor;
 	}
 
-	public LocalDate getDataInicial() {
-		return dataInicial;
+	public LocalDate getData() {
+		return data;
 	}
 	
 	public LocalDate getDataFinal() {
@@ -97,11 +104,19 @@ public class Conta {
 		return isFixa;
 	}
 	
+	public Boolean getIsHelper() {
+		return isHelper;
+	}
+	
+	public void setIsHelper(boolean isHelper) {
+		this.isHelper = isHelper;
+	}
+	
 	public void calculaDataFinal() {
 		if(!this.isFixa) {
-			this.dataFinal = this.dataInicial;
+			this.dataFinal = this.data;
 		} else {
-			this.dataFinal = this.dataInicial.plusMonths(this.duracao - 1);	
+			this.dataFinal = this.data.plusMonths(this.duracao - 1);	
 		}		
 	}
 	

@@ -41,8 +41,8 @@ public class Usuario implements UserDetails {
 	private Double totalSaidaVariavel = 0.0;
 	@Transient 
 	private Double totalSaidaGeral = 0.0;
-	@Transient 
-	private LocalDate ldPeriodoInicio;
+	//@Transient 
+	//private LocalDate ldPeriodoInicio;
 	public Usuario() {}
 	
 	public Usuario(String username, String password, String email) {//, Double saldo) {
@@ -68,16 +68,22 @@ public class Usuario implements UserDetails {
 	// Calcula totais e saldo de todos os tempos - retorna todas as contas
 	public void calculaTotais() {
 	
+		// Lista de contas helpers que nao serao retornadas para o usuario, mas seus valores sao adicionados
+		ArrayList<Conta> contasRemovidas = new ArrayList<Conta>();
+		
 		contas.forEach(conta -> {
-			if(conta.getIsFixa()) {								
-				if(conta.getIsEntrada()) {
-					totalEntradaFixa += (conta.getValor() * conta.getDuracao());
-					totalEntradaGeral += (conta.getValor() * conta.getDuracao());
-				} else {
-					totalSaidaFixa += (conta.getValor() * conta.getDuracao());
-					totalSaidaGeral += (conta.getValor() * conta.getDuracao());
+			if(conta.getIsFixa()) {
+				if(conta.getIsHelper()) {
+					contasRemovidas.add(conta);
 				}
-			} else {				
+				if(conta.getIsEntrada()) {
+					totalEntradaFixa += (conta.getValor());
+					totalEntradaGeral += (conta.getValor());
+				} else {
+					totalSaidaFixa += (conta.getValor());
+					totalSaidaGeral += (conta.getValor());
+				}
+			} else {
 				if(conta.getIsEntrada()) {
 					totalEntradaVariavel += conta.getValor();
 					totalEntradaGeral += conta.getValor();
@@ -85,8 +91,10 @@ public class Usuario implements UserDetails {
 					totalSaidaVariavel += conta.getValor();
 					totalSaidaGeral += conta.getValor();
 				}
-			}			
+			}
 		});
+		
+		contas.removeAll(contasRemovidas);
 		this.saldo = totalEntradaGeral - totalSaidaGeral;
 	}
 	
@@ -94,6 +102,9 @@ public class Usuario implements UserDetails {
 	public void calculaTotaisESaldoMesAno(int mes, int ano) {
 	
 		ArrayList<Conta> contasRemovidas = new ArrayList<Conta>();
+		calculaTotaisESaldoDoInicio(mes, ano);
+		//System.out.println("SALDO INICIO: " + saldo);
+		//System.out.println("TOTAIS INICIO: " + totalEntradaGeral + " " + totalSaidaGeral);
 		
 		contas.forEach(conta -> {
 			if(conta.getIsFixa()) {				
@@ -123,8 +134,11 @@ public class Usuario implements UserDetails {
 			}			
 		});
 		
+		
 		contas.removeAll(contasRemovidas);
-		saldo = totalEntradaGeral - totalSaidaGeral;
+		saldo += totalEntradaGeral - totalSaidaGeral;
+		//System.out.println("SALDO: " + saldo);
+		//System.out.println("TOTAIS: " + totalEntradaGeral + " " + totalSaidaGeral);
 	}
 	
 	// Calculo totais e saldo de um periodo - retorna só contas do periodo
@@ -132,15 +146,46 @@ public class Usuario implements UserDetails {
 		YearMonth periodoInicio = YearMonth.of(anoInicial, mesInicial);
 		YearMonth periodoFim = YearMonth.of(anoFinal, mesFinal);
 		
-		ldPeriodoInicio = periodoInicio.atEndOfMonth();
+		LocalDate ldPeriodoInicio = periodoInicio.atEndOfMonth();
 		LocalDate ldPeriodoFim = periodoFim.atEndOfMonth();
 		
 		//ArrayList<Conta> contasRemovidas = new ArrayList<Conta>();
 		ArrayList<Conta> contasRetornadas = new ArrayList<Conta>();
 		
+		calculaTotaisESaldoDoInicio(mesInicial, anoInicial);
 		
-		while(ldPeriodoInicio.isBefore(ldPeriodoFim) || ldPeriodoInicio.isEqual(ldPeriodoFim)) {
+		contas.forEach(conta -> {
+			LocalDate dataConta = conta.getData();
+			
+			if((dataConta.isAfter(ldPeriodoInicio) && dataConta.isBefore(ldPeriodoFim)) 
+					|| dataConta.isEqual(ldPeriodoInicio) || dataConta.isEqual(ldPeriodoFim)) {
+				
+				if(conta.getIsFixa()) {				
+					if(conta.getIsEntrada()) {
+						totalEntradaFixa += conta.getValor();
+						totalEntradaGeral += conta.getValor();
+					} else {
+						totalSaidaFixa += conta.getValor();
+						totalSaidaGeral += conta.getValor();
+					}											
+				} else {						
+					if(conta.getIsEntrada()) {
+						totalEntradaVariavel += conta.getValor();
+						totalEntradaGeral += conta.getValor();
+					} else {
+						totalSaidaVariavel += conta.getValor();
+						totalSaidaGeral += conta.getValor();
+					}
+				}
+				
+				contasRetornadas.add(conta);				
+			}
+		});
+		
+		
+		/*while(ldPeriodoInicio.isBefore(ldPeriodoFim) || ldPeriodoInicio.isEqual(ldPeriodoFim)) {
 			contas.forEach(conta -> {
+				
 				if(comparaMesAno(conta, ldPeriodoInicio.getMonthValue(), ldPeriodoInicio.getYear())) {
 					//System.out.println("Periodo inicio: " + ldPeriodoInicio.toString());
 					if(!contasRetornadas.contains(conta)) {
@@ -170,23 +215,60 @@ public class Usuario implements UserDetails {
 			
 			ldPeriodoInicio = ldPeriodoInicio.plusMonths(1);				
 			ldPeriodoInicio = LocalDate.of(ldPeriodoInicio.getYear(), ldPeriodoInicio.getMonthValue(), ldPeriodoInicio.lengthOfMonth());				
-		}
+		}*/
+		
+		
+		//Double saldoAnterior = 
 		
 		contas.clear();
 		contas.addAll(contasRetornadas);
-		saldo = totalEntradaGeral - totalSaidaGeral;
+		saldo += totalEntradaGeral - totalSaidaGeral;		
 	}
 		
-	
+	// Calcula o saldo das contas do inicio ate o mes e ano especificados.
+	// Dessa forma, ao filtrar as contas por mes ou por periodo, o saldo mostrado leva em conta tudo que entrou e saiu antes dessa data.
+	private void calculaTotaisESaldoDoInicio(int mes, int ano) {
 		
+		YearMonth especifico = YearMonth.of(ano, mes);
+		LocalDate ldEspecifico = especifico.atEndOfMonth();
+		
+		
+		contas.forEach(conta -> {
+			LocalDate dataContaReal = conta.getData();
+			LocalDate dataContaUltimoDia = dataContaReal.withDayOfMonth(dataContaReal.lengthOfMonth());
+			
+			if(dataContaUltimoDia.isBefore(ldEspecifico)) {
+				/*
+				System.out.println("Descricao: " + conta.getDescricao());
+				System.out.println("Data: " + conta.getData());
+				System.out.println("Valor: " + conta.getValor());
+				*/
+				if(conta.getIsFixa()) {
+					if(conta.getIsEntrada()) {
+						totalEntradaFixa += (conta.getValor());
+						totalEntradaGeral += (conta.getValor());
+					} else {
+						totalSaidaFixa += (conta.getValor());
+						totalSaidaGeral += (conta.getValor());
+					}
+				} else {
+					if(conta.getIsEntrada()) {
+						totalEntradaVariavel += conta.getValor();
+						totalEntradaGeral += conta.getValor();
+					} else {
+						totalSaidaVariavel += conta.getValor();
+						totalSaidaGeral += conta.getValor();
+					}
+				}		
+			}
+		});
+		
+		saldo = totalEntradaGeral - totalSaidaGeral;
+	}
+	
 	// Compara a data da conta com um mes e ano especificos
 	// Retorna true caso a conta existe nesse mes/ano
 	private boolean comparaMesAno(Conta conta, int mes, int ano) {
-		int contaMesInicial = conta.getDataInicial().getMonthValue();
-		int contaMesFinal = conta.getDataFinal().getMonthValue();
-		int contaAnoInicial = conta.getDataInicial().getYear();
-		int contaAnoFinal = conta.getDataFinal().getYear();
-		
 		/*
 		System.out.println("Descricao: " + conta.getDescricao());
 		System.out.println("ContaMesInicial: " + contaMesInicial);
@@ -197,25 +279,37 @@ public class Usuario implements UserDetails {
 		System.out.println("Ano: " + ano + "\n");			
 		 */
 		
-		YearMonth especifico = YearMonth.of(ano, mes);
-		YearMonth contaInicial = YearMonth.of(contaAnoInicial, contaMesInicial);
-		YearMonth contaFinal = YearMonth.of(contaAnoFinal, contaMesFinal);		
+		YearMonth dataEspecifica = YearMonth.of(ano, mes);
+		YearMonth dataConta = YearMonth.of(conta.getData().getYear(), conta.getData().getMonthValue());
 		
-		LocalDate ldEspecifico = especifico.atEndOfMonth();
-		LocalDate ldContaInicial = contaInicial.atEndOfMonth();
-		LocalDate ldContaFinal = contaFinal.atEndOfMonth();
+		LocalDate ldEspecifica = dataEspecifica.atEndOfMonth();
+		LocalDate ldConta = dataConta.atEndOfMonth();
 		
-		if(ldContaInicial.isAfter(ldEspecifico)) {
+		
+		
+		if(ldConta.isEqual(ldEspecifica)) {
+			/*
+			System.out.println("Descricao: " + conta.getDescricao());
+			System.out.println("Valor: " + conta.getValor());
+			System.out.println("Date Conta: " + ldConta);
+			System.out.println("Data Especifica: " + ldEspecifica);
+			*/
+			return true;
+		} else {
+			return false;
+		}
+		/*
+		if(ldContaAtual.isAfter(ldDataEspecifica)) {
 			return false;
 		}
 		while(ldContaInicial.isBefore(ldContaFinal) || ldContaInicial.isEqual(ldContaFinal)) {
 			
-			/*
+			
 			System.out.println("Descricao: " + conta.getDescricao());
 			System.out.println("ldContaInicial: " + ldContaInicial);
 			System.out.println("ldContaFinal: " + ldContaFinal);
 			System.out.println("ldEspecifico: " + ldEspecifico + "\n");						
-			*/
+			
 			if(ldContaInicial.getMonthValue() == ldEspecifico.getMonthValue() && ldContaInicial.getYear() == ldEspecifico.getYear()) {
 				return true;
 			} else {
@@ -223,7 +317,8 @@ public class Usuario implements UserDetails {
 				ldContaInicial = LocalDate.of(ldContaInicial.getYear(), ldContaInicial.getMonthValue(), ldContaInicial.lengthOfMonth());
 			}			
 		}
-		return false;		
+		return false;
+		*/		
 	}
 	
 	public boolean autentica(String password) {

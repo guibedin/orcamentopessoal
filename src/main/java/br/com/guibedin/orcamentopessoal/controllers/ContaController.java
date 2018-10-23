@@ -1,5 +1,6 @@
 package br.com.guibedin.orcamentopessoal.controllers;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ public class ContaController {
 	
 	// Adiciona nova conta no banco
 	@PostMapping(path = "/contas/nova", consumes = "application/json")
-	public ResponseEntity<String> adicionaConta(@RequestHeader("Authorization") String header, @RequestBody NovaConta nova_conta) {
+	public ResponseEntity<String> adicionaConta(@RequestHeader("Authorization") String header, @RequestBody NovaConta novaConta) {
 		
 		/*
 		System.out.println("NC descricao: " + nova_conta.getDescricao());
@@ -46,10 +47,31 @@ public class ContaController {
 		if(!username.equals("")) {
 			Usuario u = usuarioRepository.findByUsername(username);
 			
-			Conta c = new Conta(nova_conta, u);
-			Conta retorno = contaRepository.save(c);
+			if(novaConta.getIsFixa()) {
+				int duracao = novaConta.getDuracao();
+				novaConta.setIsHelper(false);				
+				LocalDate data = novaConta.getData();
+				novaConta.calculaDataFinal();
+				LocalDate dataFinal = novaConta.getDataFinal();
+				
+				for(int i = 0; i < duracao; i++) {
+					//System.out.println("NOVA CONTA DATA FINAL: " + novaConta.getDataFinal());	
+					Conta c = new Conta(novaConta, u);
+					contaRepository.save(c);
+					
+					data = data.plusMonths(1);
+					novaConta.setIsHelper(true);
+					novaConta.setData(data);
+					novaConta.setDataFinal(dataFinal);
+				}
+			} else {
+				novaConta.setIsHelper(false);				
+				Conta c = new Conta(novaConta, u);
+				contaRepository.save(c);
+			}
 			
-			System.out.println("Conta adicionada: " + retorno.toString());
+			
+			System.out.println("Conta adicionada: " + novaConta.toString());
 			return ResponseEntity.ok("Conta adicionada");
 		} else {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuario nao encontrado");
