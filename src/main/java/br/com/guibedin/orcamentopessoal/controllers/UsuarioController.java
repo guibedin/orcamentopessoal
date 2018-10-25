@@ -5,6 +5,8 @@ import java.time.YearMonth;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,6 +27,8 @@ public class UsuarioController {
 	private UsuarioRepository usuarioRepository;
 	@Autowired
 	private TokenHelper tokenHelper;
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 	
 	// Cadastra um novo usuario
 	@PostMapping("/usuario/cadastrar")
@@ -37,9 +41,11 @@ public class UsuarioController {
 		
 		System.out.println("Cadastro usuario " + usuario.getUsername());
 		if( buscaNome == null && buscaEmail == null) {
+			usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+			//System.out.println("cadastraUsuario encoded password: " + usuario.getPassword() + "\n");
 			usuarioRepository.save(usuario);
-			System.out.println("Usuario cadastrado: " + usuario.getUsername() + " " + usuario.getEmail());
 			
+			System.out.println("Usuario cadastrado: " + usuario.getUsername() + " " + usuario.getEmail());
 			return ResponseEntity.status(HttpStatus.OK).body("Usuario cadastrado com sucesso");
 		} else {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuario nao cadastrado");
@@ -57,12 +63,14 @@ public class UsuarioController {
 		
 		if(usuario != null) {
 			//System.out.println("usuario nome:" + usuario.getNome());
-			//System.out.println("usuario senha:"	+ usuario.getSenha());
-			String jwt = usuarioLogin.getUsername();
+			//System.out.println("usuario senha:"	+ usuario.getSenha());			
 			boolean autenticado = false;
 			
-			autenticado = usuario.autentica(usuarioLogin.getPassword());
+			//System.out.println("loginUsuario encoded compara: " +  + "\n");
+			autenticado = BCrypt.checkpw(usuarioLogin.getPassword(), usuario.getPassword());
 			if(autenticado) {
+				String jwt = tokenHelper.gerarToken(usuario.getUsername());
+				
 				System.out.println("Usuario logado: " + usuario.getUsername() + " " + usuario.getEmail());
 				return ResponseEntity.status(HttpStatus.OK).body(jwt);
 			} else {
@@ -78,7 +86,7 @@ public class UsuarioController {
 	public ResponseEntity<UsuarioDTO> contasDoUsuario(@RequestHeader("Authorization") String header) {
 		
 		String username = "";
-		System.out.println("contasDoUsuario");		
+		//System.out.println("contasDoUsuario");		
 		username = tokenHelper.getUsernameFromHeader(header);
 		
 		if(!username.equals("")) {

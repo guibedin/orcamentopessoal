@@ -27,25 +27,15 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter  {
 	}
 	
 	private String getToken(HttpServletRequest request) {
-		
-		
-		/*
-		Enumeration<String> headers = request.getHeaderNames();
-		
-		while(headers.hasMoreElements()) {
-			System.out.println("getToken getHeaderNames: " + headers.nextElement());	
-		}
-		*/
-		
+				
 		String token = request.getHeader(AUTH_HEADER);
 		if(token == null) {
 			return null;
 		} else {
 			token = token.split("Bearer ")[1];
-			System.out.println("doFilterInternal - getToken: " + token);
+			//System.out.println("doFilterInternal, getToken token: " + token);
 			return token;	
-		}
-		
+		}		
 	}
 
 
@@ -62,6 +52,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter  {
 	    if (authToken != null) {
 	        // Pega usuario do token
 	        String username = tokenHelper.getUsernameFromToken(authToken);
+	        //System.out.println("doFilterInternal username:" + username + "\n");
 	        if(username != null) {
 
 	            // Pega usuario do banco	            
@@ -83,11 +74,6 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter  {
 	        System.out.println(error);
 	        //SecurityContextHolder.getContext().setAuthentication(new AnonAuthentication());//prevent show login form...
 	    }
-	    chain.doFilter(request, response);
-		
+	    chain.doFilter(request, response);		
 	}
-
-	
-
-	
 }

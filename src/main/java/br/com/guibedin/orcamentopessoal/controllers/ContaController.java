@@ -1,6 +1,7 @@
 package br.com.guibedin.orcamentopessoal.controllers;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,10 +91,20 @@ public class ContaController {
 			
 			if(c.isPresent()) {
 				Conta conta = c.get();
-				contaRepository.delete(conta);
+				
+				if(conta.getIsFixa()) {
+					Collection<Integer> ids = contaRepository.findContasFixasIguais(username, conta.getDescricao(), 
+							conta.getValor(), conta.getDataFinal());
+					
+					ids.forEach(id -> {
+						contaRepository.deleteById(id);
+					});
+				} else {
+					contaRepository.delete(conta);
+				}			
 				
 				System.out.println("Conta deletada: " + conta.toString());
-				return ResponseEntity.ok("Conta adicionada");
+				return ResponseEntity.ok("Conta removida");
 			} else {
 				System.out.println("Conta inexistente.");
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Conta nao encontrada");
