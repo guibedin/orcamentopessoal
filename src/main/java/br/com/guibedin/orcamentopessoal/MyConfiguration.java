@@ -40,7 +40,6 @@ public class MyConfiguration extends WebSecurityConfigurerAdapter {
 				registry.addMapping("/**")
 					.allowedOrigins("http://localhost:3000", "https://localhost:3000")
 					.allowedMethods("*");
-				//registry.addMapping("/contas/remove/**").allowedOrigins("http://localhost:3000").allowedMethods("DELETE", "OPTIONS");
 			 }
 		};
 	}

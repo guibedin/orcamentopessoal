@@ -66,10 +66,6 @@ public class Conta {
 		this.isEntrada = novaConta.getIsEntrada();		
 		this.isHelper = novaConta.getIsHelper();
 		this.usuario = usuario;
-		//System.out.println("CONTA IS HELPER: " + this.isHelper);				
-		/*if(!this.isHelper) {
-			calculaDataFinal();
-		}*/
 	}
 
 	public long getId() {

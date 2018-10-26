@@ -56,7 +56,6 @@ public class ContaController {
 				LocalDate dataFinal = novaConta.getDataFinal();
 				
 				for(int i = 0; i < duracao; i++) {
-					//System.out.println("NOVA CONTA DATA FINAL: " + novaConta.getDataFinal());	
 					Conta c = new Conta(novaConta, u);
 					contaRepository.save(c);
 					
@@ -112,17 +111,6 @@ public class ContaController {
 		} else {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuario nao encontrado");
 		}
-	}
-	
-	/*
-	//@CrossOrigin(origins = "http://localhost:3000/", allowCredentials = "false")
-	@RequestMapping(path = "/contas/remove/{id}", method = RequestMethod.OPTIONS)
-	public void options() {
-		System.out.println("Contas Remove OPTIONS");
-	}
-	
-	public boolean validaNovaConta(NovaConta nc) {
-		return true;
-	}*/
+	}	
 
 }	
