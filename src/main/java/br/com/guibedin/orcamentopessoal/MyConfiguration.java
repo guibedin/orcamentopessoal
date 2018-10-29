@@ -38,7 +38,7 @@ public class MyConfiguration extends WebSecurityConfigurerAdapter {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
 				registry.addMapping("/**")
-					.allowedOrigins("http://localhost:3000", "https://localhost:3000")
+					.allowedOrigins("http://localhost:3000", "https://localhost:3000", "http://guibedin.github.io", "https://guibedin.github.io")
 					.allowedMethods("*");
 			 }
 		};
