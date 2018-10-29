@@ -28,7 +28,9 @@ public class Usuario implements UserDetails {
 	@Transient
 	private String jwt;
 	@Transient
-	private Double saldo = 0.0;
+	private Double saldoParcial = 0.0;
+	@Transient
+	private Double saldoTotal = 0.0;
 	@Transient
 	private Double totalEntradaFixa = 0.0;
 	@Transient
@@ -93,7 +95,8 @@ public class Usuario implements UserDetails {
 		});
 		
 		contas.removeAll(contasRemovidas);
-		this.saldo = totalEntradaGeral - totalSaidaGeral;
+		saldoTotal = totalEntradaGeral - totalSaidaGeral;
+		saldoParcial = saldoTotal;
 	}
 	
 	// Calcula totais e saldo de um mes e ano especificos - retorna só contas do mes e ano especificos
@@ -134,7 +137,11 @@ public class Usuario implements UserDetails {
 		
 		
 		contas.removeAll(contasRemovidas);
-		saldo += totalEntradaGeral - totalSaidaGeral;
+		// Calcula saldo parcial, somente cos os totais do mes/ano desejados
+		saldoParcial = totalEntradaGeral - totalSaidaGeral;
+		// Calcula saldo total, baseado no saldo já calculado do inicio das contas até o momento
+		saldoTotal += totalEntradaGeral - totalSaidaGeral;
+		
 		//System.out.println("SALDO: " + saldo);
 		//System.out.println("TOTAIS: " + totalEntradaGeral + " " + totalSaidaGeral);
 	}
@@ -181,7 +188,10 @@ public class Usuario implements UserDetails {
 
 		contas.clear();
 		contas.addAll(contasRetornadas);
-		saldo += totalEntradaGeral - totalSaidaGeral;		
+		// Calcula saldo parcial, somente cos os totais do periodo
+		saldoParcial = totalEntradaGeral - totalSaidaGeral;
+		// Calcula saldo total, baseado no saldo já calculado do inicio das contas até o momento
+		saldoTotal += totalEntradaGeral - totalSaidaGeral;		
 	}
 		
 	// Calcula o saldo das contas do inicio ate o mes e ano especificados.
@@ -190,7 +200,6 @@ public class Usuario implements UserDetails {
 		
 		YearMonth especifico = YearMonth.of(ano, mes);
 		LocalDate ldEspecifico = especifico.atEndOfMonth();
-		
 		
 		contas.forEach(conta -> {
 			LocalDate dataContaReal = conta.getData();
@@ -222,7 +231,15 @@ public class Usuario implements UserDetails {
 			}
 		});
 		
-		saldo = totalEntradaGeral - totalSaidaGeral;
+		saldoTotal = totalEntradaGeral - totalSaidaGeral;
+		
+		// Zera os totais, pois eles serao calculados somente para o mes/periodo desejado
+		totalEntradaFixa = 0.0;
+        totalEntradaVariavel = 0.0;
+        totalEntradaGeral = 0.0;
+        totalSaidaFixa = 0.0;
+        totalSaidaVariavel = 0.0;
+        totalSaidaGeral = 0.0;
 	}
 	
 	// Compara a data da conta com um mes e ano especificos
@@ -243,8 +260,6 @@ public class Usuario implements UserDetails {
 		
 		LocalDate ldEspecifica = dataEspecifica.atEndOfMonth();
 		LocalDate ldConta = dataConta.atEndOfMonth();
-		
-		
 		
 		if(ldConta.isEqual(ldEspecifica)) {
 			/*
@@ -292,12 +307,20 @@ public class Usuario implements UserDetails {
 		this.email = email;
 	}
 
-	public Double getSaldo() {
-		return saldo;
+	public Double getSaldoParcial() {
+		return saldoParcial;
 	}
 
-	public void setSaldo(Double saldo) {
-		this.saldo = saldo;
+	public void setSaldoParcial(Double saldo) {
+		this.saldoParcial = saldo;
+	}
+	
+	public Double getSaldoTotal() {
+		return saldoTotal;
+	}
+
+	public void setSaldoTotal(Double saldo) {
+		this.saldoTotal = saldo;
 	}
 
 	public List<Conta> getContas() {

@@ -9,7 +9,8 @@ import javax.persistence.Transient;
 public class UsuarioDTO {
 
 	private String nome;
-	private Double saldo;
+	private Double saldoParcial;
+	private Double saldoTotal;
 	private List<Conta> contas = new ArrayList<Conta>();
 	private Double totalEntradaFixa = 0.0;
 	private Double totalEntradaVariavel = 0.0;
@@ -35,7 +36,8 @@ public class UsuarioDTO {
 	public UsuarioDTO(Usuario u) {
 		
 		this.nome = u.getUsername();
-		this.saldo = u.getSaldo();
+		this.saldoParcial = u.getSaldoParcial();
+		this.saldoTotal = u.getSaldoTotal();
 		this.contas = u.getContas();
 		this.totalEntradaFixa = u.getTotalEntradaFixa();
 		this.totalEntradaVariavel = u.getTotalEntradaVariavel();
@@ -53,14 +55,22 @@ public class UsuarioDTO {
 		this.nome = nome;
 	}
 
-	public Double getSaldo() {
-		return saldo;
+	public Double getSaldoTotal() {
+		return saldoTotal;
 	}
 
-	public void setSaldo(Double saldo) {
-		this.saldo = saldo;
+	public void setSaldoTotal(Double saldo) {
+		this.saldoTotal = saldo;
 	}
 
+	public Double getSaldoParcial() {
+		return saldoParcial;
+	}
+
+	public void setSaldoParcial(Double saldo) {
+		this.saldoParcial = saldo;
+	}
+	
 	public List<Conta> getContas() {
 		return contas;
 	}
