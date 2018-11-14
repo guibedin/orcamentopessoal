@@ -1,5 +1,7 @@
 /target/
 !.mvn/wrapper/maven-wrapper.jar
+keystore.p12
+nohup.out
 
 ### STS ###
 .apt_generated
