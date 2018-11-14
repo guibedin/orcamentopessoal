@@ -2,6 +2,7 @@ package br.com.guibedin.orcamentopessoal.resources;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -159,7 +160,7 @@ public class Usuario implements UserDetails {
 		calculaTotaisESaldoDoInicio(mesInicial, anoInicial);
 		
 		contas.forEach(conta -> {
-			LocalDate dataConta = conta.getData();
+			LocalDate dataConta = conta.getData().with(TemporalAdjusters.lastDayOfMonth());
 			
 			if((dataConta.isAfter(ldPeriodoInicio) && dataConta.isBefore(ldPeriodoFim)) 
 					|| dataConta.isEqual(ldPeriodoInicio) || dataConta.isEqual(ldPeriodoFim)) {
