@@ -24,7 +24,8 @@ public class Usuario implements UserDetails {
 	private String email;
 	//private Double saldo;
 	@OneToMany(mappedBy="usuario")
-	private List<Conta> contas = new ArrayList<Conta>();
+	private List<ContaEntrada> contasEntrada = new ArrayList<ContaEntrada>();
+	private List<ContaSaida> contasSaida = new ArrayList<ContaSaida>();
 	
 	@Transient
 	private String jwt;
@@ -70,13 +71,10 @@ public class Usuario implements UserDetails {
 	public void calculaTotais() {
 	
 		// Lista de contas helpers que nao serao retornadas para o usuario, mas seus valores sao adicionados
-		ArrayList<Conta> contasRemovidas = new ArrayList<Conta>();
+		ArrayList<ContaEntrada> contasRemovidas = new ArrayList<ContaEntrada>();
 		
-		contas.forEach(conta -> {
-			if(conta.getIsFixa()) {
-				if(conta.getIsHelper()) {
-					contasRemovidas.add(conta);
-				}
+		contasEntrada.forEach(conta -> {
+			if(conta.getIsFixa()) {				
 				if(conta.getIsEntrada()) {
 					totalEntradaFixa += (conta.getValor());
 					totalEntradaGeral += (conta.getValor());
@@ -95,10 +93,11 @@ public class Usuario implements UserDetails {
 			}
 		});
 		
-		contas.removeAll(contasRemovidas);
+		contasEntrada.removeAll(contasRemovidas);
 		saldoTotal = totalEntradaGeral - totalSaidaGeral;
 		saldoParcial = saldoTotal;
 	}
+	
 	
 	// Calcula totais e saldo de um mes e ano especificos - retorna só contas do mes e ano especificos
 	public void calculaTotaisESaldoMesAno(int mes, int ano) {
@@ -108,7 +107,7 @@ public class Usuario implements UserDetails {
 		//System.out.println("SALDO INICIO: " + saldo);
 		//System.out.println("TOTAIS INICIO: " + totalEntradaGeral + " " + totalSaidaGeral);
 		
-		contas.forEach(conta -> {
+		contasEntrada.forEach(conta -> {
 			if(conta.getIsFixa()) {				
 				if(comparaMesAno(conta, mes, ano)) {
 					if(conta.getIsEntrada()) {
@@ -137,7 +136,7 @@ public class Usuario implements UserDetails {
 		});
 		
 		
-		contas.removeAll(contasRemovidas);
+		contasEntrada.removeAll(contasRemovidas);
 		// Calcula saldo parcial, somente cos os totais do mes/ano desejados
 		saldoParcial = totalEntradaGeral - totalSaidaGeral;
 		// Calcula saldo total, baseado no saldo já calculado do inicio das contas até o momento
@@ -159,7 +158,7 @@ public class Usuario implements UserDetails {
 		
 		calculaTotaisESaldoDoInicio(mesInicial, anoInicial);
 		
-		contas.forEach(conta -> {
+		contasEntrada.forEach(conta -> {
 			LocalDate dataConta = conta.getData().with(TemporalAdjusters.lastDayOfMonth());
 			
 			if((dataConta.isAfter(ldPeriodoInicio) && dataConta.isBefore(ldPeriodoFim)) 
@@ -187,8 +186,8 @@ public class Usuario implements UserDetails {
 			}
 		});
 
-		contas.clear();
-		contas.addAll(contasRetornadas);
+		contasEntrada.clear();
+		contasEntrada.addAll(contasRetornadas);
 		// Calcula saldo parcial, somente cos os totais do periodo
 		saldoParcial = totalEntradaGeral - totalSaidaGeral;
 		// Calcula saldo total, baseado no saldo já calculado do inicio das contas até o momento
@@ -202,7 +201,7 @@ public class Usuario implements UserDetails {
 		YearMonth especifico = YearMonth.of(ano, mes);
 		LocalDate ldEspecifico = especifico.atEndOfMonth();
 		
-		contas.forEach(conta -> {
+		contasEntrada.forEach(conta -> {
 			LocalDate dataContaReal = conta.getData();
 			LocalDate dataContaUltimoDia = dataContaReal.withDayOfMonth(dataContaReal.lengthOfMonth());
 			
@@ -275,6 +274,15 @@ public class Usuario implements UserDetails {
 		}
 	}
 	
+	private void calculaEntradaPorMes(int mes, int ano) {
+	
+		this.contasEntrada.forEach(conta -> {
+			if(conta.getIsFixa()) {
+				totalEntradaFixa += conta.getValor();
+			}
+		});
+	}
+	
 	public boolean autentica(String password) {
 		
 		if(password.equals(this.password)) {
@@ -284,12 +292,12 @@ public class Usuario implements UserDetails {
 		}
 	}
 	
-	public void adicionaConta(Conta conta) {		
-		contas.add(conta);
+	public void adicionaContaEntrada(ContaEntrada conta) {		
+		contasEntrada.add(conta);
 	}
 	
 	public void removeConta(Conta conta) {
-		contas.remove(conta);
+		contasEntrada.remove(conta);
 	}
 	
 	public void setUsername(String username) {
@@ -324,12 +332,12 @@ public class Usuario implements UserDetails {
 		this.saldoTotal = saldo;
 	}
 
-	public List<Conta> getContas() {
-		return contas;
+	public List<ContaEntrada> getContas() {
+		return contasEntrada;
 	}
 
-	public void setContas(List<Conta> contas) {
-		this.contas = contas;
+	public void setContas(List<ContaEntrada> contas) {
+		this.contasEntrada = contas;
 	}
 
 	public Double getTotalEntradaFixa() {

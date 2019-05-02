@@ -26,11 +26,7 @@ public class Conta {
 	protected String descricao;
 	protected Double valor;
 	protected LocalDate data;
-	protected LocalDate dataFinal;
-	
-	protected Boolean isEntrada; // Entrada ou Saida
-	protected Boolean isFixa; // Fixa ou variavel
-	protected Boolean isHelper; // Conta Helper = conta fixa que nao precisa ser retornada para o front end, pois eh utilizada para facilitar calculos
+	protected Boolean isFixa;
 	
 	@Transient
 	protected Integer duracao;
@@ -40,18 +36,20 @@ public class Conta {
 	
 	public Conta() {}
 	
-	public Conta(Integer id, String descricao, Double valor, String dataString, Integer duracao, Boolean isEntrada, Boolean isFixa, Usuario usuario) {
+	public Conta(Integer id, String descricao, Double valor, String dataString, Integer duracao, Usuario usuario) {
 		
 		this.id = id;
 		this.descricao = descricao;
 		this.valor = valor;
-		this.data = LocalDate.parse(dataString);	
+		this.data = LocalDate.parse(dataString);
 		this.duracao = duracao;
-		this.isEntrada = isEntrada;
-		this.isFixa = isFixa;
 		this.usuario = usuario;
 		
-		calculaDataFinal();
+		if(this.duracao > 1) {
+			this.isFixa = true;
+		} else {
+			this.isFixa = false;
+		}
 	}
 	
 	public Conta(NovaConta novaConta, Usuario usuario) { 
@@ -60,12 +58,14 @@ public class Conta {
 		this.descricao = novaConta.getDescricao();
 		this.valor = novaConta.getValor();
 		this.data = novaConta.getData();
-		this.dataFinal = novaConta.getDataFinal();
 		this.duracao = novaConta.getDuracao();
-		this.isFixa = novaConta.getIsFixa();
-		this.isEntrada = novaConta.getIsEntrada();		
-		this.isHelper = novaConta.getIsHelper();
 		this.usuario = usuario;
+		
+		if(this.duracao > 1) {
+			this.isFixa = true;
+		} else {
+			this.isFixa = false;
+		}
 	}
 
 	public long getId() {
@@ -84,36 +84,12 @@ public class Conta {
 		return data;
 	}
 	
-	public LocalDate getDataFinal() {
-		return dataFinal;
-	}
-	
-	public Integer getDuracao() {
-		return duracao;
-	}
-	
-	public Boolean getIsEntrada() {
-		return isEntrada;
-	}
-	
 	public Boolean getIsFixa() {
 		return isFixa;
 	}
 	
-	public Boolean getIsHelper() {
-		return isHelper;
-	}
-	
-	public void setIsHelper(boolean isHelper) {
-		this.isHelper = isHelper;
-	}
-	
-	public void calculaDataFinal() {
-		if(!this.isFixa) {
-			this.dataFinal = this.data;
-		} else {
-			this.dataFinal = this.data.plusMonths(this.duracao - 1);	
-		}		
+	public Integer getDuracao() {
+		return duracao;
 	}
 	
 	@Override

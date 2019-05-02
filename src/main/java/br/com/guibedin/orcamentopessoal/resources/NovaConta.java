@@ -14,21 +14,14 @@ public class NovaConta {
 	protected LocalDate dataFinal;
 	protected Integer duracao;
 	
-	protected Boolean isEntrada;	
-	protected Boolean isFixa; // Entrada ou Saida
-	protected Boolean isHelper; // Conta Helper = conta fixa que nao precisa ser retornada para o front end, pois eh utilizada para facilitar calculos
-	
 	public NovaConta() {}
 	
-	public NovaConta(String descricao, Double valor, String dataString, Integer duracao, Boolean isEntrada, Boolean isFixa) {
+	public NovaConta(String descricao, Double valor, String dataString, Integer duracao) {
 		
 		this.descricao = descricao;
 		this.valor = valor;		
 		this.data = LocalDate.parse(dataString);	
 		this.duracao = duracao;
-		this.isEntrada = isEntrada;
-		this.isFixa = isFixa;
-		this.isHelper = false;
 		
 		calculaDataFinal();
 	}
@@ -53,24 +46,8 @@ public class NovaConta {
 		return duracao;
 	}
 	
-	public Boolean getIsEntrada() {
-		return isEntrada;
-	}
-	
-	public Boolean getIsFixa() {
-		return isFixa;
-	}
-	
 	public void setData(LocalDate data) {
 		this.data = data;
-	}
-	
-	public Boolean getIsHelper() {
-		return isHelper;
-	}
-	
-	public void setIsHelper(boolean isHelper) {
-		this.isHelper = isHelper;
 	}
 	
 	public void setDataFinal(LocalDate dataFinal) {
@@ -78,7 +55,7 @@ public class NovaConta {
 	}
 	
 	public void calculaDataFinal() {
-		if(!this.isFixa) {
+		if(this.duracao == 0) {
 			this.dataFinal = this.data;
 		} else {
 			this.dataFinal = this.data.plusMonths(this.duracao - 1);	
